@@ -60,6 +60,15 @@ class BytesType extends EvmType {
     }
 }
 exports.BytesType = BytesType;
+class DynamicBytesType extends EvmType {
+    constructor() {
+        super();
+    }
+    generateCodeForOutput() {
+        return "string";
+    }
+}
+exports.DynamicBytesType = DynamicBytesType;
 class AddressType extends EvmType {
     generateCodeForOutput() {
         return "string";
@@ -108,7 +117,7 @@ function parseEvmType(rawType) {
         case "byte":
             return new BytesType(1);
         case "bytes":
-            return new ArrayType(new BytesType(1));
+            return new DynamicBytesType();
     }
     if (isUIntTypeRegex.test(rawType)) {
         const match = isUIntTypeRegex.exec(rawType);

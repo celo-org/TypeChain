@@ -13,12 +13,14 @@ const path_1 = require("path");
 const fs_extra_1 = require("fs-extra");
 const glob = require("glob");
 const prettier = require("prettier");
+const generateExports_1 = require("./generateExports");
 const generateSource_1 = require("./generateSource");
 const copyRuntime_1 = require("./copyRuntime");
 const abiParser_1 = require("./abiParser");
 const logger_1 = require("./logger");
 const chalk_1 = require("chalk");
 const { blue, red, green, yellow } = chalk_1.default;
+const exportFilename = "contracts.ts";
 function generateTypeChainWrappers(options) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!options.cwd) {
@@ -36,12 +38,14 @@ function generateTypeChainWrappers(options) {
         }
         logger_1.logger.log("Generating typings...");
         // copy runtime in directory of first typing (@todo it should be customizable)
-        const runtimeFilename = "typechain-runtime.ts";
+        const runtimeFilename = "typechain-runtime.d.ts";
         const runtimePath = path_1.join(options.outDir || path_1.dirname(matches[0]), runtimeFilename);
         copyRuntime_1.copyRuntime(runtimePath);
         logger_1.logger.log(blue(`${runtimeFilename} => ${runtimePath}`));
         // generate wrappers
         matches.forEach(p => processFile(options, p, options.force, runtimePath, Object.assign({}, (prettierConfig || {}), { parser: "typescript" }), options.outDir));
+        // Write exports file
+        generateExports_1.generateExports(options.outDir || path_1.dirname(matches[0]), exportFilename, options.extension, [runtimeFilename, exportFilename], Object.assign({}, (prettierConfig || {}), { parser: "typescript" }));
     });
 }
 exports.generateTypeChainWrappers = generateTypeChainWrappers;
@@ -50,7 +54,7 @@ function processFile(options, absPath, forceOverwrite, runtimeAbsPath, prettierC
     const parsedInputPath = path_1.parse(absPath);
     const filenameWithoutAnyExtensions = getFilenameWithoutAnyExtensions(parsedInputPath.name);
     const outputDir = fixedOutputDir || parsedInputPath.dir;
-    const outputPath = path_1.join(outputDir, filenameWithoutAnyExtensions + ".ts");
+    const outputPath = path_1.join(outputDir, filenameWithoutAnyExtensions + options.extension);
     const relativeOutputPath = path_1.relative(options.cwd, outputPath);
     const runtimeRelativePath = getRelativeModulePath(outputDir, runtimeAbsPath);
     logger_1.logger.log(blue(`${relativeInputPath} => ${relativeOutputPath}`));

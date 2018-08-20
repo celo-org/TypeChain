@@ -61,6 +61,16 @@ export class BytesType extends EvmType {
   }
 }
 
+export class DynamicBytesType extends EvmType {
+  constructor() {
+    super();
+  }
+
+  generateCodeForOutput(): string {
+    return "string";
+  }
+}
+
 export class AddressType extends EvmType {
   generateCodeForOutput(): string {
     return "string";
@@ -116,7 +126,7 @@ export function parseEvmType(rawType: string): EvmType {
     case "byte":
       return new BytesType(1);
     case "bytes":
-      return new ArrayType(new BytesType(1));
+      return new DynamicBytesType();
   }
 
   if (isUIntTypeRegex.test(rawType)) {

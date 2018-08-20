@@ -28,6 +28,10 @@ export declare class BytesType extends EvmType {
     constructor(size: number);
     generateCodeForOutput(): string;
 }
+export declare class DynamicBytesType extends EvmType {
+    constructor();
+    generateCodeForOutput(): string;
+}
 export declare class AddressType extends EvmType {
     generateCodeForOutput(): string;
     generateCodeForInput(): string;

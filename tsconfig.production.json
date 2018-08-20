@@ -3,7 +3,7 @@
     "strict": true,
     "sourceMap": false,
     "types": ["node", "mocha"],
-    "lib": ["es2015"],
+    "lib": ["es2016"],
     "target": "es2016",
     "outDir": "./dist",
     "module": "commonjs",

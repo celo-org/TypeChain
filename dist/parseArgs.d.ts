@@ -1,5 +1,6 @@
 export interface IOptions {
     glob: string;
+    extension: string;
     force: boolean;
     outDir?: string;
     cwd?: string;
