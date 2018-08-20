@@ -89,6 +89,17 @@ class ArrayType extends EvmType {
     }
 }
 exports.ArrayType = ArrayType;
+// TODO(asaj): Ensure tuple types correspond to a specific format once web3
+// supports structs.
+class TupleType extends EvmType {
+    generateCodeForOutput() {
+        return "any";
+    }
+    generateCodeForInput() {
+        return "any";
+    }
+}
+exports.TupleType = TupleType;
 const isUIntTypeRegex = /^uint([0-9]*)$/;
 const isIntTypeRegex = /^int([0-9]*)$/;
 const isBytesTypeRegex = /^bytes([0-9]+)$/;
@@ -118,6 +129,8 @@ function parseEvmType(rawType) {
             return new BytesType(1);
         case "bytes":
             return new DynamicBytesType();
+        case "tuple":
+            return new TupleType();
     }
     if (isUIntTypeRegex.test(rawType)) {
         const match = isUIntTypeRegex.exec(rawType);

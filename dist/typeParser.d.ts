@@ -42,4 +42,8 @@ export declare class ArrayType extends EvmType {
     constructor(itemType: EvmType, size?: number | undefined);
     generateCodeForOutput(): string;
 }
+export declare class TupleType extends EvmType {
+    generateCodeForOutput(): string;
+    generateCodeForInput(): string;
+}
 export declare function parseEvmType(rawType: string): EvmType;
