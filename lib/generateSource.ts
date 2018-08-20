@@ -65,6 +65,7 @@ ${input.functions
 export declare class ${typeName} {
     static new(options: any): ${typeName}
     static setProvider(provider: any): void
+    address: string
     ${input.constants.map(constant => `${constant.name}: ${constant.name}Type`).join("\n")}
     ${input.constantFunctions
       .map(constantFunction => `public ${constantFunction.name}: ${constantFunction.name}Type`)
