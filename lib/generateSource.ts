@@ -54,7 +54,9 @@ ${input.functions
     .join(";\n\n")}
 
 export declare class ${typeName} {
-    static new(options: any): ${typeName}
+    static new(options?: any): ${typeName}
+    static at(address: string): ${typeName}
+    static deployed(): ${typeName}
     static setProvider(provider: any): void
     address: string
 
