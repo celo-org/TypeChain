@@ -1,35 +1,6 @@
 /* tslint:disable */
 import { BigNumber } from "bignumber.js";
 
-declare class TypeChainContract {
-  public readonly rawWeb3Contract: any;
-  public readonly address: string;
-
-  constructor(web3: any, address: string | BigNumber, public readonly contractAbi: object);
-}
-
-// tslint:disable-next-line
-export interface LogEntry {
-  logIndex: number | null;
-  transactionIndex: number | null;
-  transactionHash: string;
-  blockHash: string | null;
-  blockNumber: number | null;
-  address: string;
-  data: string;
-  topics: string[];
-}
-
-// tslint:disable-next-line
-export interface DecodedLogEntry<A> extends LogEntry {
-  event: string;
-  args: A;
-}
-
-interface IDictionary<T = string> {
-  [id: string]: T;
-}
-
 declare interface Transaction {
   tx: string;
   receipt: Receipt;

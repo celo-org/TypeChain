@@ -105,7 +105,7 @@ export class TupleType extends EvmType {
 
 const isUIntTypeRegex = /^uint([0-9]*)$/;
 const isIntTypeRegex = /^int([0-9]*)$/;
-const isBytesTypeRegex = /^bytes([0-9]+)$/;
+const isFixedSizeBytesRegex = /^bytes([0-9]+)$/;
 
 export function parseEvmType(rawType: string): EvmType {
   const lastChar = rawType[rawType.length - 1];
@@ -153,8 +153,8 @@ export function parseEvmType(rawType: string): EvmType {
     return new IntegerType(parseInt(match![1] || "256"));
   }
 
-  if (isBytesTypeRegex.test(rawType)) {
-    const match = isBytesTypeRegex.exec(rawType);
+  if (isFixedSizeBytesRegex.test(rawType)) {
+    const match = isFixedSizeBytesRegex.exec(rawType);
     return new BytesType(parseInt(match![1] || "1"));
   }
 

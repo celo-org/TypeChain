@@ -65,9 +65,8 @@
     "tsc": "tsc --noEmit",
     "formatting": "prettier --list-different '**/*.ts'",
     "formatting:fix": "prettier --write '**/*.ts'",
-    "test": "yarn test:unit",
     "test:fix": "yarn lint:fix && yarn test:unit",
-    "test:unit": "NODE_ENV=test mocha --require ts-node/register.js --require test/setup-chai.ts 'test/unit/**/*.spec.ts'"
+    "test": "NODE_ENV=test mocha --require ts-node/register.js --require test/setup-chai.ts 'test/unit/**/*.spec.ts'"
   },
   "main": "./dist/generateTypeChainWrappers.js",
   "bin": "./dist/cli.js"
