@@ -3,13 +3,13 @@
     "strict": true,
     "sourceMap": true,
     "types": ["node", "mocha"],
-    "lib": ["es2015"],
+    "lib": ["es2016"],
     "target": "es2016",
     "outDir": "./dist",
     "module": "commonjs",
     "declaration": true,
     "plugins": [
-      { 
+      {
         "name": "tslint-language-service",
         "alwaysShowRuleFailuresAsWarnings": false,
         "ignoreDefinitionFiles": true,

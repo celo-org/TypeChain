@@ -61,6 +61,16 @@ export class BytesType extends EvmType {
   }
 }
 
+export class DynamicBytesType extends EvmType {
+  constructor() {
+    super();
+  }
+
+  generateCodeForOutput(): string {
+    return "string";
+  }
+}
+
 export class AddressType extends EvmType {
   generateCodeForOutput(): string {
     return "string";
@@ -81,9 +91,21 @@ export class ArrayType extends EvmType {
   }
 }
 
+// TODO(asaj): Ensure tuple types correspond to a specific format once web3
+// supports structs.
+export class TupleType extends EvmType {
+  generateCodeForOutput(): string {
+    return "any";
+  }
+
+  generateCodeForInput(): string {
+    return "any";
+  }
+}
+
 const isUIntTypeRegex = /^uint([0-9]*)$/;
 const isIntTypeRegex = /^int([0-9]*)$/;
-const isBytesTypeRegex = /^bytes([0-9]+)$/;
+const isFixedSizeBytesRegex = /^bytes([0-9]+)$/;
 
 export function parseEvmType(rawType: string): EvmType {
   const lastChar = rawType[rawType.length - 1];
@@ -116,7 +138,9 @@ export function parseEvmType(rawType: string): EvmType {
     case "byte":
       return new BytesType(1);
     case "bytes":
-      return new ArrayType(new BytesType(1));
+      return new DynamicBytesType();
+    case "tuple":
+      return new TupleType();
   }
 
   if (isUIntTypeRegex.test(rawType)) {
@@ -129,8 +153,8 @@ export function parseEvmType(rawType: string): EvmType {
     return new IntegerType(parseInt(match![1] || "256"));
   }
 
-  if (isBytesTypeRegex.test(rawType)) {
-    const match = isBytesTypeRegex.exec(rawType);
+  if (isFixedSizeBytesRegex.test(rawType)) {
+    const match = isFixedSizeBytesRegex.exec(rawType);
     return new BytesType(parseInt(match![1] || "1"));
   }
 

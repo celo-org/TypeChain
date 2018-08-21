@@ -28,9 +28,11 @@
     "bluebird": "^3.5.1",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "ganache-cli": "^6.0.3",
+    "ganache-cli": "^6.1.6",
     "krzkaczor-solc": "^0.4.24",
     "mocha": "^4.0.1",
+    "truffle": "^4.1.14",
+    "truffle-contract": "^3.0.6",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-language-service": "^0.9.7",
@@ -63,12 +65,8 @@
     "tsc": "tsc --noEmit",
     "formatting": "prettier --list-different '**/*.ts'",
     "formatting:fix": "prettier --write '**/*.ts'",
-    "test": "yarn lint && ./scripts/test.sh",
-    "test:fix": "yarn lint:fix && ./scripts/test.sh",
-    "test:unit": "NODE_ENV=test mocha --require ts-node/register.js --require test/setup-chai.ts 'test/unit/**/*.spec.ts'",
-    "test:integration": "NODE_ENV=test mocha --require ts-node/register.js --require test/setup-chai.ts 'test/integration/web3.ts' 'test/integration/**/*.spec.ts'",
-    "test:generateContracts": "NODE_ENV=development ts-node ./scripts/generate",
-    "test:generateContractsOutDir": "NODE_ENV=development ts-node ./lib/cli.ts --force --outDir ./test-tmp/"
+    "test:fix": "yarn lint:fix && yarn test:unit",
+    "test": "NODE_ENV=test mocha --require ts-node/register.js --require test/setup-chai.ts 'test/unit/**/*.spec.ts'"
   },
   "main": "./dist/generateTypeChainWrappers.js",
   "bin": "./dist/cli.js"

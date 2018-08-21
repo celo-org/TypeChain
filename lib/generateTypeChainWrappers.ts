@@ -4,6 +4,7 @@ import { pathExistsSync } from "fs-extra";
 import * as glob from "glob";
 import * as prettier from "prettier";
 
+import { generateExports } from "./generateExports";
 import { generateSource } from "./generateSource";
 import { copyRuntime } from "./copyRuntime";
 import { extractAbi } from "./abiParser";
@@ -12,6 +13,8 @@ import { logger } from "./logger";
 
 import chalk from "chalk";
 const { blue, red, green, yellow } = chalk;
+
+const exportFilename = "contracts.ts";
 
 export async function generateTypeChainWrappers(options: IOptions): Promise<void> {
   if (!options.cwd) {
@@ -34,7 +37,7 @@ export async function generateTypeChainWrappers(options: IOptions): Promise<void
   logger.log("Generating typings...");
 
   // copy runtime in directory of first typing (@todo it should be customizable)
-  const runtimeFilename = "typechain-runtime.ts";
+  const runtimeFilename = "typechain-runtime.d.ts";
   const runtimePath = join(options.outDir || dirname(matches[0]), runtimeFilename);
   copyRuntime(runtimePath);
   logger.log(blue(`${runtimeFilename} => ${runtimePath}`));
@@ -50,6 +53,18 @@ export async function generateTypeChainWrappers(options: IOptions): Promise<void
       options.outDir,
     ),
   );
+
+  // Write exports file
+  generateExports(
+    options.outDir || dirname(matches[0]),
+    exportFilename,
+    options.extension,
+    [runtimeFilename, exportFilename],
+    {
+      ...(prettierConfig || {}),
+      parser: "typescript",
+    },
+  );
 }
 
 function processFile(
@@ -64,7 +79,7 @@ function processFile(
   const parsedInputPath = parse(absPath);
   const filenameWithoutAnyExtensions = getFilenameWithoutAnyExtensions(parsedInputPath.name);
   const outputDir = fixedOutputDir || parsedInputPath.dir;
-  const outputPath = join(outputDir, filenameWithoutAnyExtensions + ".ts");
+  const outputPath = join(outputDir, filenameWithoutAnyExtensions + options.extension);
   const relativeOutputPath = relative(options.cwd!, outputPath);
 
   const runtimeRelativePath = getRelativeModulePath(outputDir, runtimeAbsPath);
