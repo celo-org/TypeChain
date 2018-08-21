@@ -30,8 +30,6 @@ export interface FunctionDeclaration {
 }
 
 export interface Contract {
-  constants: Array<ConstantDeclaration>;
-
   constantFunctions: Array<ConstantFunctionDeclaration>;
 
   functions: Array<FunctionDeclaration>;
@@ -78,7 +76,6 @@ export interface RawEventArgAbiDefinition {
 }
 
 export function parse(abi: Array<RawAbiDefinition>): Contract {
-  const constants: Array<ConstantDeclaration> = [];
   const constantFunctions: Array<ConstantFunctionDeclaration> = [];
   const functions: Array<FunctionDeclaration> = [];
   const events: Array<EventDeclaration> = [];
@@ -95,14 +92,12 @@ export function parse(abi: Array<RawAbiDefinition>): Contract {
     }
 
     if (abiPiece.type === "function") {
-      if (checkForOverloads(constants, constantFunctions, functions, abiPiece.name)) {
+      if (checkForOverloads(constantFunctions, functions, abiPiece.name)) {
         logger.log(yellow(`Detected overloaded constant function ${abiPiece.name} skipping...`));
         return;
       }
 
-      if (abiPiece.constant && abiPiece.inputs.length === 0 && abiPiece.outputs.length === 1) {
-        constants.push(parseConstant(abiPiece));
-      } else if (abiPiece.constant) {
+      if (abiPiece.constant) {
         constantFunctions.push(parseConstantFunction(abiPiece));
       } else {
         functions.push(parseFunctionDeclaration(abiPiece));
@@ -125,7 +120,6 @@ export function parse(abi: Array<RawAbiDefinition>): Contract {
   });
 
   return {
-    constants,
     constantFunctions,
     functions,
     events,
@@ -133,14 +127,12 @@ export function parse(abi: Array<RawAbiDefinition>): Contract {
 }
 
 function checkForOverloads(
-  constants: Array<ConstantDeclaration>,
   constantFunctions: Array<ConstantFunctionDeclaration>,
   functions: Array<FunctionDeclaration>,
   name: string,
 ) {
   return (
     constantFunctions.find(f => f.name === name) ||
-    constants.find(f => f.name === name) ||
     functions.find(f => f.name === name)
   );
 }
@@ -151,14 +143,6 @@ function parseOutputs(outputs: Array<RawAbiParameter>): EvmType[] {
   } else {
     return outputs.map(param => parseEvmType(param.type));
   }
-}
-
-function parseConstant(abiPiece: RawAbiDefinition): ConstantDeclaration {
-  debug(`Parsing constant "${abiPiece.name}"`);
-  return {
-    name: abiPiece.name,
-    output: parseEvmType(abiPiece.outputs[0].type),
-  };
 }
 
 export function parseEvent(abiPiece: RawEventAbiDefinition): EventDeclaration {

@@ -19,7 +19,6 @@ export interface FunctionDeclaration {
     payable: boolean;
 }
 export interface Contract {
-    constants: Array<ConstantDeclaration>;
     constantFunctions: Array<ConstantFunctionDeclaration>;
     functions: Array<FunctionDeclaration>;
     events: Array<EventDeclaration>;
