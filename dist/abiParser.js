@@ -7,7 +7,6 @@ const errors_1 = require("./errors");
 const logger_1 = require("./logger");
 const { yellow } = chalk_1.default;
 function parse(abi) {
-    const constants = [];
     const constantFunctions = [];
     const functions = [];
     const events = [];
@@ -22,14 +21,11 @@ function parse(abi) {
             return;
         }
         if (abiPiece.type === "function") {
-            if (checkForOverloads(constants, constantFunctions, functions, abiPiece.name)) {
+            if (checkForOverloads(constantFunctions, functions, abiPiece.name)) {
                 logger_1.logger.log(yellow(`Detected overloaded constant function ${abiPiece.name} skipping...`));
                 return;
             }
-            if (abiPiece.constant && abiPiece.inputs.length === 0 && abiPiece.outputs.length === 1) {
-                constants.push(parseConstant(abiPiece));
-            }
-            else if (abiPiece.constant) {
+            if (abiPiece.constant) {
                 constantFunctions.push(parseConstantFunction(abiPiece));
             }
             else {
@@ -49,16 +45,14 @@ function parse(abi) {
         throw new Error(`Unrecognized abi element: ${abiPiece.type}`);
     });
     return {
-        constants,
         constantFunctions,
         functions,
         events,
     };
 }
 exports.parse = parse;
-function checkForOverloads(constants, constantFunctions, functions, name) {
+function checkForOverloads(constantFunctions, functions, name) {
     return (constantFunctions.find(f => f.name === name) ||
-        constants.find(f => f.name === name) ||
         functions.find(f => f.name === name));
 }
 function parseOutputs(outputs) {
@@ -68,13 +62,6 @@ function parseOutputs(outputs) {
     else {
         return outputs.map(param => typeParser_1.parseEvmType(param.type));
     }
-}
-function parseConstant(abiPiece) {
-    debug_1.default(`Parsing constant "${abiPiece.name}"`);
-    return {
-        name: abiPiece.name,
-        output: typeParser_1.parseEvmType(abiPiece.outputs[0].type),
-    };
 }
 function parseEvent(abiPiece) {
     debug_1.default(`Parsing event "${abiPiece.name}"`);
