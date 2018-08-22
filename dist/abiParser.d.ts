@@ -3,6 +3,9 @@ export interface AbiParameter {
     name: string;
     type: EvmType;
 }
+export interface ConstructorDeclaration {
+    inputs: Array<AbiParameter>;
+}
 export interface ConstantDeclaration {
     name: string;
     output: EvmType;
@@ -19,6 +22,7 @@ export interface FunctionDeclaration {
     payable: boolean;
 }
 export interface Contract {
+    constructor: ConstructorDeclaration;
     constantFunctions: Array<ConstantFunctionDeclaration>;
     functions: Array<FunctionDeclaration>;
     events: Array<EventDeclaration>;

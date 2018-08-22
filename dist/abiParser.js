@@ -7,13 +7,14 @@ const errors_1 = require("./errors");
 const logger_1 = require("./logger");
 const { yellow } = chalk_1.default;
 function parse(abi) {
+    let constructor = { inputs: [] };
     const constantFunctions = [];
     const functions = [];
     const events = [];
     abi.forEach(abiPiece => {
         // @todo implement missing abi pieces
-        // skip constructors for now
         if (abiPiece.type === "constructor") {
+            constructor = parseConstructor(abiPiece);
             return;
         }
         // skip fallback functions
@@ -45,6 +46,7 @@ function parse(abi) {
         throw new Error(`Unrecognized abi element: ${abiPiece.type}`);
     });
     return {
+        constructor,
         constantFunctions,
         functions,
         events,
@@ -76,6 +78,11 @@ function parseRawEventArg(eventArg) {
         name: eventArg.name,
         isIndexed: eventArg.indexed,
         type: typeParser_1.parseEvmType(eventArg.type),
+    };
+}
+function parseConstructor(abiPiece) {
+    return {
+        inputs: abiPiece.inputs.map(parseRawAbiParameter)
     };
 }
 function parseConstantFunction(abiPiece) {
