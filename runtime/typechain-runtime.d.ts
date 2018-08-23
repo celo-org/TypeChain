@@ -41,5 +41,12 @@ declare interface Event {
   address: string;
   type: string;
   event: string;
-  args: any;
+  args: EventArgs;
+}
+
+declare interface EventArgs {
+  // TODO: Would be nice if this wasn't `any`. The most sensible option would
+  // probably be to make this a union of possible Solidity output types, but at
+  // the moment this includes tuples which we're typing as `any`.
+  [key: string]: any
 }
