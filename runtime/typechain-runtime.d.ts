@@ -1,6 +1,14 @@
 /* tslint:disable */
 import { BigNumber } from "bignumber.js";
 
+export declare class TruffleContract {
+  static setProvider(provider: any): void
+
+  address: string
+  // TODO(Martin): precise ABI typing
+  abi: any
+}
+
 declare interface Transaction {
   tx: string;
   receipt: Receipt;
