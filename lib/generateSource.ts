@@ -59,9 +59,9 @@ ${input.functions
     .join(";\n\n")}
 
 export declare class ${typeName} extends TruffleContract {
-    static new(${constructorParams}): ${typeName}
-    static at(address: string): ${typeName}
-    static deployed(): ${typeName}
+    static new(${constructorParams}): Promise<${typeName}>
+    static at(address: string): Promise<${typeName}>
+    static deployed(): Promise<${typeName}>
 
     // View functions
     ${input.constantFunctions

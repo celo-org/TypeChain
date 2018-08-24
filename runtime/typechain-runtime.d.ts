@@ -3,6 +3,9 @@ import { BigNumber } from "bignumber.js";
 
 export declare class TruffleContract {
   static setProvider(provider: any): void
+  static new(...args: any[]): Promise<TruffleContract>
+  static at(address: string): Promise<TruffleContract>
+  static deployed(): Promise<TruffleContract>
 
   address: string
   // TODO(Martin): precise ABI typing
