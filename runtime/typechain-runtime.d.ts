@@ -7,6 +7,8 @@ export declare class TruffleContract {
   static at(address: string): Promise<TruffleContract>
   static deployed(): Promise<TruffleContract>
 
+  static contractName: string
+
   address: string
   // TODO(Martin): precise ABI typing
   abi: any
