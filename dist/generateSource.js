@@ -20,38 +20,10 @@ function codeGenForContract(abi, input, context) {
 import { Transaction, Receipt, ReceiptLog, Event, EventArgs, TruffleContract } from "./typechain-runtime";
 
 // Types for view functions
-${input.constantFunctions
-        .map(constantFunction => {
-        const functionHeader = `(${constantFunction.inputs
-            .map(codeGenForParams)
-            .join(", ")}): Promise<${codeGenForOutputTypeList(constantFunction.outputs)}>`;
-        const functionType = `(${constantFunction.inputs
-            .map(codeGenForParams)
-            .join(", ")}) => Promise<${codeGenForOutputTypeList(constantFunction.outputs)}>`;
-        return `interface ${constantFunction.name}Type {
-        ${functionHeader};
-        call: ${functionType};
-      };`;
-    })
-        .join(";\n\n")}
+${input.constantFunctions.map(generateViewFunctionType).join(";\n\n")}
 
 // Types for functions
-${input.functions
-        .map(func => {
-        const functionHeader = `(${func.inputs
-            .map(codeGenForParams)
-            .concat("options?: any")
-            .join(", ")}): Promise<Transaction>`;
-        const functionType = `(${func.inputs
-            .map(codeGenForParams)
-            .concat("options?: any")
-            .join(", ")}) => Promise<${codeGenForOutputTypeList(func.outputs)}>`;
-        return `interface ${func.name}Type {
-      ${functionHeader};
-      call: ${functionType};
-    };`;
-    })
-        .join(";\n\n")}
+${input.functions.map(generateFunctionType).join(";\n\n")}
 
 export declare class ${typeName} extends TruffleContract {
     static new(${constructorParams}): Promise<${typeName}>
@@ -59,12 +31,10 @@ export declare class ${typeName} extends TruffleContract {
     static deployed(): Promise<${typeName}>
 
     // View functions
-    ${input.constantFunctions
-        .map(constantFunction => `public ${constantFunction.name}: ${constantFunction.name}Type`)
-        .join(";\n")}
+    ${input.constantFunctions.map(generateFunctionDeclaration).join(";\n")}
 
     // Functions
-    ${input.functions.map(func => `${func.name}: ${func.name}Type`).join(";\n")}
+    ${input.functions.map(generateFunctionDeclaration).join(";\n")}
   }`;
 }
 function codeGenForParams(param, index) {
@@ -82,4 +52,32 @@ function codeGenForOutputTypeList(output) {
     else {
         return `[${output.map(x => x.generateCodeForOutput()).join(", ")}]`;
     }
+}
+function generateViewFunctionType(constantFunction) {
+    const params = `(${constantFunction.inputs
+        .map(codeGenForParams)
+        .join(", ")})`;
+    const outputs = codeGenForOutputTypeList(constantFunction.outputs);
+    const functionHeader = `${params}: Promise<${outputs}>`;
+    const functionType = `${params} => Promise<${outputs}>`;
+    return `interface ${constantFunction.name}Type {
+    ${functionHeader};
+    call: ${functionType};
+  };`;
+}
+function generateFunctionType(func) {
+    const params = `(${func.inputs
+        .map(codeGenForParams)
+        .concat("options?: any")
+        .join(", ")})`;
+    const outputs = codeGenForOutputTypeList(func.outputs);
+    const functionHeader = `${params}: Promise<Transaction>`;
+    const functionType = `${params} => Promise<${outputs}>`;
+    return `interface ${func.name}Type {
+    ${functionHeader};
+    call: ${functionType};
+  };`;
+}
+function generateFunctionDeclaration(func) {
+    return `public ${func.name}: ${func.name}Type`;
 }

@@ -10,7 +10,6 @@ function parse(abi) {
     let constructor = { inputs: [] };
     const constantFunctions = [];
     const functions = [];
-    const events = [];
     abi.forEach(abiPiece => {
         // @todo implement missing abi pieces
         if (abiPiece.type === "constructor") {
@@ -34,13 +33,8 @@ function parse(abi) {
             }
             return;
         }
+        // ignore events
         if (abiPiece.type === "event") {
-            const eventAbi = abiPiece;
-            if (eventAbi.anonymous) {
-                logger_1.logger.log(yellow("Skipping anonymous event..."));
-                return;
-            }
-            events.push(parseEvent(eventAbi));
             return;
         }
         throw new Error(`Unrecognized abi element: ${abiPiece.type}`);
@@ -49,7 +43,6 @@ function parse(abi) {
         constructor,
         constantFunctions,
         functions,
-        events,
     };
 }
 exports.parse = parse;
@@ -64,21 +57,6 @@ function parseOutputs(outputs) {
     else {
         return outputs.map(param => typeParser_1.parseEvmType(param.type));
     }
-}
-function parseEvent(abiPiece) {
-    debug_1.default(`Parsing event "${abiPiece.name}"`);
-    return {
-        name: abiPiece.name,
-        inputs: abiPiece.inputs.map(parseRawEventArg),
-    };
-}
-exports.parseEvent = parseEvent;
-function parseRawEventArg(eventArg) {
-    return {
-        name: eventArg.name,
-        isIndexed: eventArg.indexed,
-        type: typeParser_1.parseEvmType(eventArg.type),
-    };
 }
 function parseConstructor(abiPiece) {
     return {
@@ -99,7 +77,6 @@ function parseFunctionDeclaration(abiPiece) {
         name: abiPiece.name,
         inputs: abiPiece.inputs.map(parseRawAbiParameter),
         outputs: parseOutputs(abiPiece.outputs),
-        payable: abiPiece.payable,
     };
 }
 function parseRawAbiParameter(rawAbiParameter) {

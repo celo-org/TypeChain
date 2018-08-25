@@ -1,4 +1,10 @@
-import { RawAbiDefinition, parse, Contract, AbiParameter, EventArgDeclaration } from "./abiParser";
+import {
+  AbiParameter,
+  Contract,
+  FunctionDeclaration,
+  parse,
+  RawAbiDefinition
+} from "./abiParser";
 import { getVersion } from "./utils";
 import { EvmType, ArrayType } from "./typeParser";
 
@@ -25,38 +31,10 @@ function codeGenForContract(abi: Array<RawAbiDefinition>, input: Contract, conte
 import { Transaction, Receipt, ReceiptLog, Event, EventArgs, TruffleContract } from "./typechain-runtime";
 
 // Types for view functions
-${input.constantFunctions
-    .map(constantFunction => {
-      const functionHeader: string = `(${constantFunction.inputs
-        .map(codeGenForParams)
-        .join(", ")}): Promise<${codeGenForOutputTypeList(constantFunction.outputs)}>`;
-      const functionType: string = `(${constantFunction.inputs
-        .map(codeGenForParams)
-        .join(", ")}) => Promise<${codeGenForOutputTypeList(constantFunction.outputs)}>`;
-      return `interface ${constantFunction.name}Type {
-        ${functionHeader};
-        call: ${functionType};
-      };`;
-    })
-    .join(";\n\n")}
+${input.constantFunctions.map(generateViewFunctionType).join(";\n\n")}
 
 // Types for functions
-${input.functions
-    .map(func => {
-      const functionHeader: string = `(${func.inputs
-        .map(codeGenForParams)
-        .concat("options?: any")
-        .join(", ")}): Promise<Transaction>`;
-      const functionType: string = `(${func.inputs
-        .map(codeGenForParams)
-        .concat("options?: any")
-        .join(", ")}) => Promise<${codeGenForOutputTypeList(func.outputs)}>`;
-      return `interface ${func.name}Type {
-      ${functionHeader};
-      call: ${functionType};
-    };`;
-    })
-    .join(";\n\n")}
+${input.functions.map(generateFunctionType).join(";\n\n")}
 
 export declare class ${typeName} extends TruffleContract {
     static new(${constructorParams}): Promise<${typeName}>
@@ -64,12 +42,10 @@ export declare class ${typeName} extends TruffleContract {
     static deployed(): Promise<${typeName}>
 
     // View functions
-    ${input.constantFunctions
-      .map(constantFunction => `public ${constantFunction.name}: ${constantFunction.name}Type`)
-      .join(";\n")}
+    ${input.constantFunctions.map(generateFunctionDeclaration).join(";\n")}
 
     // Functions
-    ${input.functions.map(func => `${func.name}: ${func.name}Type`).join(";\n")}
+    ${input.functions.map(generateFunctionDeclaration).join(";\n")}
   }`;
 }
 
@@ -89,4 +65,35 @@ function codeGenForOutputTypeList(output: Array<EvmType>): string {
   } else {
     return `[${output.map(x => x.generateCodeForOutput()).join(", ")}]`;
   }
+}
+
+function generateViewFunctionType(constantFunction: FunctionDeclaration) {
+  const params = `(${constantFunction.inputs
+      .map(codeGenForParams)
+      .join(", ")})`
+  const outputs = codeGenForOutputTypeList(constantFunction.outputs)
+  const functionHeader: string = `${params}: Promise<${outputs}>`;
+  const functionType: string = `${params} => Promise<${outputs}>`;
+  return `interface ${constantFunction.name}Type {
+    ${functionHeader};
+    call: ${functionType};
+  };`;
+}
+
+function generateFunctionType(func: FunctionDeclaration) {
+  const params = `(${func.inputs
+      .map(codeGenForParams)
+      .concat("options?: any")
+      .join(", ")})`
+  const outputs = codeGenForOutputTypeList(func.outputs)
+  const functionHeader: string = `${params}: Promise<Transaction>`;
+  const functionType: string = `${params} => Promise<${outputs}>`;
+  return `interface ${func.name}Type {
+    ${functionHeader};
+    call: ${functionType};
+  };`;
+}
+
+function generateFunctionDeclaration(func: FunctionDeclaration) {
+  return `public ${func.name}: ${func.name}Type`
 }
