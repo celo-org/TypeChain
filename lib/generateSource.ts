@@ -88,9 +88,11 @@ function generateFunctionType(func: FunctionDeclaration) {
   const outputs = codeGenForOutputTypeList(func.outputs)
   const functionHeader: string = `${params}: Promise<Transaction>`;
   const functionType: string = `${params} => Promise<${outputs}>`;
+  const estimateGasType: string = `${params} => Promise<number>`;
   return `interface ${func.name}Type {
     ${functionHeader};
     call: ${functionType};
+    estimateGas: ${estimateGasType};
   };`;
 }
 
