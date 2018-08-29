@@ -15,32 +15,16 @@ export interface ConstructorDeclaration {
   inputs: Array<AbiParameter>;
 }
 
-export interface ConstantDeclaration {
-  name: string;
-  output: EvmType;
-}
-
-export interface ConstantFunctionDeclaration {
-  name: string;
-  inputs: Array<AbiParameter>;
-  outputs: Array<EvmType>; //we dont care about named returns for now
-}
-
 export interface FunctionDeclaration {
-  name: string; // @todo missing inputs,
+  name: string;
   inputs: Array<AbiParameter>;
   outputs: Array<EvmType>; //we dont care about named returns for now
-  payable: boolean;
 }
 
 export interface Contract {
   constructor: ConstructorDeclaration;
-
-  constantFunctions: Array<ConstantFunctionDeclaration>;
-
+  constantFunctions: Array<FunctionDeclaration>;
   functions: Array<FunctionDeclaration>;
-
-  events: Array<EventDeclaration>;
 }
 
 export interface RawAbiParameter {
@@ -57,35 +41,10 @@ export interface RawAbiDefinition {
   type: string;
 }
 
-export interface EventDeclaration {
-  name: string;
-  inputs: EventArgDeclaration[];
-}
-
-export interface EventArgDeclaration {
-  isIndexed: boolean;
-  name: string;
-  type: EvmType;
-}
-
-export interface RawEventAbiDefinition {
-  type: "event";
-  anonymous: boolean;
-  name: string;
-  inputs: RawEventArgAbiDefinition[];
-}
-
-export interface RawEventArgAbiDefinition {
-  indexed: boolean;
-  name: string;
-  type: string;
-}
-
 export function parse(abi: Array<RawAbiDefinition>): Contract {
   let constructor: ConstructorDeclaration = { inputs: [] };
-  const constantFunctions: Array<ConstantFunctionDeclaration> = [];
+  const constantFunctions: Array<FunctionDeclaration> = [];
   const functions: Array<FunctionDeclaration> = [];
-  const events: Array<EventDeclaration> = [];
 
   abi.forEach(abiPiece => {
     // @todo implement missing abi pieces
@@ -112,14 +71,8 @@ export function parse(abi: Array<RawAbiDefinition>): Contract {
       return;
     }
 
+    // ignore events
     if (abiPiece.type === "event") {
-      const eventAbi = (abiPiece as any) as RawEventAbiDefinition;
-      if (eventAbi.anonymous) {
-        logger.log(yellow("Skipping anonymous event..."));
-        return;
-      }
-
-      events.push(parseEvent(eventAbi));
       return;
     }
 
@@ -130,12 +83,11 @@ export function parse(abi: Array<RawAbiDefinition>): Contract {
     constructor,
     constantFunctions,
     functions,
-    events,
   };
 }
 
 function checkForOverloads(
-  constantFunctions: Array<ConstantFunctionDeclaration>,
+  constantFunctions: Array<FunctionDeclaration>,
   functions: Array<FunctionDeclaration>,
   name: string,
 ) {
@@ -153,30 +105,13 @@ function parseOutputs(outputs: Array<RawAbiParameter>): EvmType[] {
   }
 }
 
-export function parseEvent(abiPiece: RawEventAbiDefinition): EventDeclaration {
-  debug(`Parsing event "${abiPiece.name}"`);
-
-  return {
-    name: abiPiece.name,
-    inputs: abiPiece.inputs.map(parseRawEventArg),
-  };
-}
-
-function parseRawEventArg(eventArg: RawEventArgAbiDefinition): EventArgDeclaration {
-  return {
-    name: eventArg.name,
-    isIndexed: eventArg.indexed,
-    type: parseEvmType(eventArg.type),
-  };
-}
-
 function parseConstructor(abiPiece: RawAbiDefinition): ConstructorDeclaration {
   return {
     inputs: abiPiece.inputs.map(parseRawAbiParameter)
   }
 }
 
-function parseConstantFunction(abiPiece: RawAbiDefinition): ConstantFunctionDeclaration {
+function parseConstantFunction(abiPiece: RawAbiDefinition): FunctionDeclaration {
   debug(`Parsing constant function "${abiPiece.name}"`);
   return {
     name: abiPiece.name,
@@ -191,7 +126,6 @@ function parseFunctionDeclaration(abiPiece: RawAbiDefinition): FunctionDeclarati
     name: abiPiece.name,
     inputs: abiPiece.inputs.map(parseRawAbiParameter),
     outputs: parseOutputs(abiPiece.outputs),
-    payable: abiPiece.payable,
   };
 }
 
