@@ -14,13 +14,13 @@ export declare class TruffleContract {
   abi: any
 }
 
-declare interface Transaction {
+export declare interface Transaction {
   tx: string;
   receipt: Receipt;
   logs: Array<Event>;
 }
 
-declare interface Receipt {
+export declare interface Receipt {
   transactionHash: string;
   transactionIndex: number;
   blockHash: string;
@@ -33,7 +33,7 @@ declare interface Receipt {
   logsBloom: string;
 }
 
-declare interface ReceiptLog {
+export declare interface ReceiptLog {
   logIndex: number;
   transactionIndex: number;
   transactionHash: string;
@@ -45,7 +45,7 @@ declare interface ReceiptLog {
   type: string;
 }
 
-declare interface Event {
+export declare interface Event {
   logIndex: number;
   transactionIndex: number;
   transactionHash: string;
@@ -57,7 +57,7 @@ declare interface Event {
   args: EventArgs;
 }
 
-declare interface EventArgs {
+export declare interface EventArgs {
   // TODO: Would be nice if this wasn't `any`. The most sensible option would
   // probably be to make this a union of possible Solidity output types, but at
   // the moment this includes tuples which we're typing as `any`.
