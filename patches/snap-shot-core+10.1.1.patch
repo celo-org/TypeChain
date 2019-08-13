@@ -1,0 +1,23 @@
+patch-package
+--- a/node_modules/snap-shot-core/src/file-system.js
++++ b/node_modules/snap-shot-core/src/file-system.js
+@@ -171,7 +171,7 @@ function prepareFragments (snapshots, opts = { sortSnapshots: true }) {
+ 
+   const fragments = names.map(testName => {
+     debug(`snapshot fragment name "${testName}"`)
+-    const value = snapshots[testName]
++    const value = escapeStringTemplates(snapshots[testName])
+     const escapedName = escapeQuotes(testName)
+     return is.string(value)
+       ? exportText(escapedName, value)
+@@ -181,6 +181,10 @@ function prepareFragments (snapshots, opts = { sortSnapshots: true }) {
+   return fragments
+ }
+ 
++function escapeStringTemplates(s) {
++  return s.replace(/`/g, "\\`").replace(/\$\{/g, "\\${")
++}
++
+ function maybeSortAndSave (snapshots, filename, opts = { sortSnapshots: true }) {
+   const fragments = prepareFragments(snapshots, opts)
+   debug('have %s', pluralize('fragment', fragments.length, true))
